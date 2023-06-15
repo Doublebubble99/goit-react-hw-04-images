@@ -3,16 +3,17 @@ import { Overlay, ModalWindow } from './Modal.styled';
 import PropTypes from 'prop-types';
 export default function Modal({ isClosed, largeImage, title }) {
   useEffect(() => {
+    const closeModalbyEsc = evt => {
+      if (evt.key === 'Escape') {
+        isClosed(false);
+      }
+    };
     document.addEventListener('keydown', closeModalbyEsc);
     return () => {
       document.removeEventListener('keydown', closeModalbyEsc);
     };
-  });
-  const closeModalbyEsc = evt => {
-    if (evt.key === 'Escape') {
-      isClosed(false);
-    }
-  };
+  }, [isClosed]);
+
   const closeModal = evt => {
     if (evt.currentTarget === evt.target) {
       isClosed(false);

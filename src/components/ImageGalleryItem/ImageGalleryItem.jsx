@@ -1,16 +1,13 @@
 import { GalleryItem, GalleryImage } from './ImageGalleryItem.styled';
 import PropTypes from 'prop-types';
-export default function ImageGalleryItem({
-  id,
-  smallImage,
-  openModal,
-  largeImageURL,
-}) {
+import { GetContext } from 'components/App';
+export default function ImageGalleryItem({ id, smallImage, largeImageURL }) {
+  const { handleId } = GetContext();
   return (
     <GalleryItem
       className="gallery-item"
       id={id}
-      onClick={() => openModal(largeImageURL)}
+      onClick={() => handleId(largeImageURL)}
     >
       <GalleryImage src={smallImage} alt={id} />
     </GalleryItem>

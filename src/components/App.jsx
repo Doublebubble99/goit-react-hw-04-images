@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Container } from './App.styled';
 import SearchBar from './SearchBar';
 import ImageGallery from './ImageGallery';
@@ -6,8 +6,11 @@ import Button from './Button';
 import Loader from './Loader';
 import Modal from './Modal';
 import { getImages } from '../services/QueryGallery';
+import { createContext } from 'react';
+const Context = createContext();
+export const GetContext = () => useContext(Context);
 export default function App() {
-  const [page, setPage] = useState(null);
+  const [page, setPage] = useState(1);
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState('');
@@ -15,16 +18,17 @@ export default function App() {
   const [showBtn, setShowBtn] = useState('');
   const [largeImage, setLargeImage] = useState('');
   useEffect(() => {
-    if (query !== '' || page !== null) {
-      setIsLoading(true);
-      getImages(query, page)
-        .then(response => {
-          setImages(prevState => [...prevState, ...response.hits]);
-          setShowBtn(page < Math.ceil(response.totalHits / 12));
-        })
-        .catch(error => error.message)
-        .finally(() => setIsLoading(false));
+    if (!query) {
+      return;
     }
+    setIsLoading(true);
+    getImages(query, page)
+      .then(response => {
+        setImages(prevState => [...prevState, ...response.hits]);
+        setShowBtn(page < Math.ceil(response.totalHits / 12));
+      })
+      .catch(error => error.message)
+      .finally(() => setIsLoading(false));
   }, [page, query]);
 
   const getQuery = data => {
@@ -43,14 +47,16 @@ export default function App() {
     setIsOpen(close);
   };
   return (
-    <Container>
-      <SearchBar onSubmit={getQuery} />
-      {images && <ImageGallery images={images} openModal={handleId} />}
-      {showBtn && <Button onClick={fetchImages} />}
-      {isLoading && <Loader />}
-      {isOpen && (
-        <Modal largeImage={largeImage} isClosed={closeModal} title={query} />
-      )}
-    </Container>
+    <Context.Provider value={{ largeImage, images, handleId }}>
+      <Container>
+        <SearchBar onSubmit={getQuery} />
+        {images && <ImageGallery images={images} />}
+        {showBtn && <Button onClick={fetchImages} />}
+        {isLoading && <Loader />}
+        {isOpen && (
+          <Modal largeImage={largeImage} isClosed={closeModal} title={query} />
+        )}
+      </Container>
+    </Context.Provider>
   );
 }
